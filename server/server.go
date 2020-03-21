@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"log"
 	"net"
@@ -67,7 +68,7 @@ func main()  {
 	}
 
 	Collection = client.Database("mydb").Collection("blog")
-	listener, errLis := net.Listen("tcp", "0.0.0.0:50051")
+	listener, errLis := net.Listen("tcp", "localhost:50051")
 
 	if errLis != nil {
 		log.Fatalf("failed to listen: %v\n", errLis)
@@ -77,7 +78,7 @@ func main()  {
 
 	s := grpc.NewServer(opts...)
 	pb.RegisterBlogServiceServer(s, &server{})
-
+	reflection.Register(s)
 	go func() {
 		fmt.Println("server is starting....")
 		if err := s.Serve(listener); err != nil {
