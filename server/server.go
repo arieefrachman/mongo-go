@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/arieefrachman/mongo-go/pb"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -48,6 +49,32 @@ func (*server) CreateBlog(ctx context.Context, request *pb.CreateBlogRequest) (*
 	return &pb.CreateBlogResponse{
 		Blog: &pb.Blog{
 			Id: oid.Hex(),
+		},
+	}, nil
+}
+
+func (*server) ReadBlog(ctx context.Context, request *pb.ReadBlogRequest) (*pb.ReadBlogResponse, error){
+	blogID := request.BlogId
+	oid, err := primitive.ObjectIDFromHex(blogID)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, fmt.Sprintf("cannot parse ID"))
+	}
+
+	d := &BlogItem{}
+	filter := bson.M{
+		"_id": oid,
+	}
+	res := Collection.FindOne(context.Background(), filter)
+	if err := res.Decode(d); err != nil {
+		return nil, status.Errorf(codes.NotFound, fmt.Sprintf("document not found"))
+	}
+
+	return &pb.ReadBlogResponse{
+		Blog: &pb.Blog{
+			Id:                   d.ID.Hex(),
+			AuthorId:             d.AuthorID,
+			Title:                d.Title,
+			Content:              d.Content,
 		},
 	}, nil
 }
