@@ -8,6 +8,33 @@ import (
 )
 
 func main() {
+	//CreateBlogClient()
+	ReadBlogClient()
+}
+
+func ReadBlogClient()  {
+	s, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+
+	defer s.Close()
+
+	c := pb.NewBlogServiceClient(s)
+
+	blog, err := c.ReadBlog(context.Background(), &pb.ReadBlogRequest{
+		BlogId: "5e79664aa330b908c073d19d",
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(blog.Blog)
+
+}
+
+func CreateBlogClient() {
 	fmt.Println("Blog client started")
 
 	s, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
