@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/arieefrachman/mongo-go/pb"
 	"google.golang.org/grpc"
+	"log"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 func ReadBlogClient()  {
 	s, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
-		panic(err)
+		log.Fatalf("unable to connect server: %v", err)
 	}
 
 	defer s.Close()
@@ -27,7 +28,7 @@ func ReadBlogClient()  {
 	})
 
 	if err != nil {
-		panic(err)
+		log.Fatalf("something went wrong: %v", err)
 	}
 
 	fmt.Println(blog.Blog)
